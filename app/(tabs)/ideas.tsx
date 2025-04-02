@@ -8,98 +8,88 @@ import {
 } from 'react-native';
 import { Link } from 'expo-router';
 
+
 const IDEAS = [
   {
     id: '1',
-    title: 'Plant Pot from Plastic Bottle',
-    material: 'Plastic Bottle',
+    title: 'Cardboard Cat Scratcher',
+    material: 'Cardboard',
     difficulty: 'Easy',
-    image: 'https://images.unsplash.com/photo-1513506003901-1e6a229e2d15?w=500',
+    image: 'https://images.unsplash.com/photo-1533738363-b7f9aef128ce?w=500&auto=format',
+    category: 0
   },
   {
     id: '2',
-    title: 'Bird Feeder',
-    material: 'Plastic Bottle',
+    title: 'Glass Bottle Terrarium',
+    material: 'Glass',
     difficulty: 'Medium',
-    image: 'https://images.unsplash.com/photo-1590764258299-0f91fa7f95e8?w=500',
+    image: 'https://images.unsplash.com/photo-1485908953667-cf6d88997642?w=500&auto=format',
+    category: 1
   },
   {
     id: '3',
-    title: 'Lamp Shade',
-    material: 'Glass Bottle',
-    difficulty: 'Hard',
-    image: 'https://images.unsplash.com/photo-1513506003901-1e6a229e2d15?w=500',
+    title: 'Tin Can Wind Chimes',
+    material: 'Metal',
+    difficulty: 'Medium',
+    image: 'https://images.unsplash.com/photo-1514320291840-2e0a9bf2a9ae?w=500&auto=format',
+    category: 2
   },
   {
     id: '4',
-    title: 'Denim Tote Bag',
-    material: 'Old Jeans',
-    difficulty: 'Medium',
-    image: 'https://images.unsplash.com/photo-1563170351-82e6ba78682e?w=500',
+    title: 'Newspaper Basket',
+    material: 'Paper',
+    difficulty: 'Hard',
+    image: 'https://images.unsplash.com/photo-1583947581924-a6b1cf6b6a9e?w=500&auto=format',
+    category: 3
   },
   {
     id: '5',
-    title: 'Tin Can Herb Garden',
-    material: 'Tin Cans',
-    difficulty: 'Easy',
-    image: 'https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?w=500',
+    title: 'Plastic Bottle Vertical Garden',
+    material: 'Plastic',
+    difficulty: 'Medium',
+    image: 'https://images.unsplash.com/photo-1560851702-9e5cb104b505?w=500&auto=format',
+    category: 4
   },
   {
     id: '6',
-    title: 'Sweater Pillow Covers',
-    material: 'Old Sweaters',
-    difficulty: 'Medium',
-    image: 'https://images.unsplash.com/photo-1579656592043-0a1d0db1b8a6?w=500',
+    title: 'Mixed Material Wall Art',
+    material: 'Assorted Trash',
+    difficulty: 'Hard',
+    image: 'https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?w=500&auto=format',
+    category: 5
   },
   {
     id: '7',
-    title: 'CD Mosaic Mirror',
-    material: 'Old CDs/DVDs',
-    difficulty: 'Medium',
-    image: 'https://images.unsplash.com/photo-1579783901589-2f3d5d7edf51?w=500',
+    title: 'Cardboard Toy Fort',
+    material: 'Cardboard',
+    difficulty: 'Easy',
+    image: 'https://images.unsplash.com/photo-1608889825271-9696287a7cc6?w=500&auto=format',
+    category: 0
   },
   {
     id: '8',
-    title: 'Pallet Coffee Table',
-    material: 'Wooden Pallet',
-    difficulty: 'Hard',
-    image: 'https://images.unsplash.com/photo-1555043722-4523113b0e0e?w=500',
+    title: 'Stained Glass Bottles',
+    material: 'Glass',
+    difficulty: 'Medium',
+    image: 'https://images.unsplash.com/photo-1605000797499-95e51b1ddf90?w=500&auto=format',
+    category: 1
   },
   {
     id: '9',
-    title: 'Wine Cork Key Holder',
-    material: 'Wine Corks',
-    difficulty: 'Easy',
-    image: 'https://images.unsplash.com/photo-1605000797499-95e51b1ddf90?w=500',
+    title: 'Spoon Wind Spinner',
+    material: 'Metal',
+    difficulty: 'Hard',
+    image: 'https://images.unsplash.com/photo-1511994298241-608e28f14fde?w=500&auto=format',
+    category: 2
   },
   {
     id: '10',
-    title: 'T-Shirt Braided Rug',
-    material: 'Old T-Shirts',
-    difficulty: 'Medium',
-    image: 'https://images.unsplash.com/photo-1600181950695-10a2b4d2a1c0?w=500',
-  },
-  {
-    id: '11',
-    title: 'Ladder Bookshelf',
-    material: 'Old Ladder',
-    difficulty: 'Medium',
-    image: 'https://images.unsplash.com/photo-1586023492125-27a3a5a5c8a3?w=500',
-  },
-  {
-    id: '12',
-    title: 'Mason Jar Spice Rack',
-    material: 'Glass Jars',
+    title: 'Paper Bead Jewelry',
+    material: 'Paper',
     difficulty: 'Easy',
-    image: 'https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=500',
-  },
-  {
-    id: '13',
-    title: 'Bicycle Wheel Clock',
-    material: 'Bicycle Wheel',
-    difficulty: 'Medium',
-    image: 'https://images.unsplash.com/photo-1511994298241-608e28f14fde?w=500',
-  },
+    image: 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=500&auto=format',
+    category: 3
+  }
 ];
 
 export default function IdeasScreen() {

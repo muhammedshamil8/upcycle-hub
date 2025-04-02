@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { Camera, Share2 } from 'lucide-react-native';
-import { Link } from 'expo-router';
+import { Link, router } from 'expo-router';
 import {
   getFirestore,
   collection,
@@ -20,6 +20,7 @@ import {
 } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 import { useAuth } from '@/contexts/AuthContext';
+import { IDEAS } from '@/const/ideas';
 
 export default function UploadScreen() {
   const [image, setImage] = useState<string | null>(null);
@@ -67,6 +68,7 @@ export default function UploadScreen() {
 
     try {
       if (!user) {
+        router.push('/login');
         throw new Error('User not authenticated');
       }
 
@@ -122,58 +124,92 @@ export default function UploadScreen() {
     return data.secure_url;
   };
 
+  // First, create a category mapping based on your 0-5 system
+  const CATEGORY_MAP: Record<string, number> = {
+    cardboard: 0,
+    glass: 1,
+    metal: 2,
+    paper: 3,
+    plastic: 4,
+    trash: 5,
+  };
+
+  // Updated analyzeImageWithAI function
   const analyzeImageWithAI = async (imageUrl: string, docId: string) => {
     setAnalyzing(true);
 
     try {
-      // Replace with your actual AI API endpoint
-      const API_ENDPOINT = 'https://your-ai-service.com/analyze';
-
+      const API_ENDPOINT = 'https://imageclassification-bz6o.onrender.com/predict';
       const response = await fetch(API_ENDPOINT, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          imageUrl,
-          userId: getAuth().currentUser?.uid,
-          docId,
-        }),
+        body: JSON.stringify({ imageUrl, docId }),
       });
 
-      if (!response.ok) {
-        throw new Error('AI analysis failed');
-      }
+      if (!response.ok) throw new Error('AI analysis failed');
 
-      const analysisResult = await response.json();
+      const { class: materialClass, confidenceScore } = await response.json();
 
-      // Update Firestore with analysis results
+      // Get matching projects
+      const categoryId = CATEGORY_MAP[materialClass.toLowerCase()] ?? 5; // Default to trash
+      const matchingProjects = Object.entries(IDEAS)
+        .filter(
+          ([_, project]: [string, any]) =>
+            (project as any).category === categoryId
+        )
+        .sort(() => 0.5 - Math.random()) // Shuffle
+        .slice(0, 3) // Get top 3
+        .map(([id, project]: [string, any]) => ({
+          id,
+          title: (project as any).title,
+          difficulty: (project as any).difficulty,
+          image: (project as any).image,
+        }));
+
+      // Update Firestore
       const db = getFirestore();
       await addDoc(collection(db, 'analysisResults'), {
         uploadId: docId,
         userId: getAuth().currentUser?.uid,
-        results: analysisResult,
+        results: {
+          materialClass,
+          confidenceScore,
+          suggestions: matchingProjects,
+        },
         createdAt: serverTimestamp(),
       });
 
-      // Update UI with results
-      setResult({
-        material: analysisResult.material || 'Unknown Material',
-        suggestions: analysisResult.suggestions || [],
+      // Update UI
+      setResult((prevState) => ({
+        ...prevState,
+        material: materialClass,
+        confidence: confidenceScore,
+        suggestions: matchingProjects,
         analysisId: docId,
-      });
+      }));
     } catch (error) {
       console.error('Analysis failed:', error);
-      // Fallback to mock data if API fails
-      setResult({
-        material: 'Plastic Bottle',
-        suggestions: [
-          { id: '1', title: 'Plant Pot', difficulty: 'Easy' },
-          { id: '2', title: 'Bird Feeder', difficulty: 'Medium' },
-          { id: '3', title: 'Lamp Shade', difficulty: 'Hard' },
-        ],
+
+      // Enhanced fallback with random suggestions
+      const fallbackProjects = Object.entries(IDEAS)
+        .sort(() => 0.5 - Math.random())
+        .slice(0, 3)
+        .map(([id, project]) => ({
+          id,
+          title: (project as any).title,
+          difficulty: (project as any).difficulty,
+          image: (project as any).image,
+        }));
+
+      setResult((prevState) => ({
+        ...prevState,
+        material: 'Unknown Material',
+        confidence: 0,
+        suggestions: fallbackProjects,
         analysisId: docId,
-      });
+      }));
     } finally {
       setAnalyzing(false);
     }
@@ -273,47 +309,55 @@ export default function UploadScreen() {
           </View>
         )}
 
-        {result && (
-          <View style={styles.results}>
-            <Text style={styles.materialText}>
-              ✨ Detected Material: {result.material}
+        {uploading || analyzing ? (
+            <Text style={styles.analyzingSubtext}>
+              {uploading
+                ? 'loading...'
+                : ''}
             </Text>
-            <Text style={styles.suggestionsTitle}>
-              Recommended Upcycling Projects:
-            </Text>
-            {result.suggestions.map((suggestion) => (
-              <View key={suggestion.id} style={styles.suggestionContainer}>
-                <Link href={`/idea/${suggestion.id}`} asChild>
-                  <TouchableOpacity style={styles.suggestionCard}>
-                    <Text style={styles.suggestionTitle}>
-                      {suggestion.title}
-                    </Text>
-                    <View
-                      style={[
-                        styles.difficultyBadge,
-                        suggestion.difficulty === 'Easy'
-                          ? styles.difficultyEasy
-                          : suggestion.difficulty === 'Medium'
-                          ? styles.difficultyMedium
-                          : styles.difficultyHard,
-                      ]}
-                    >
-                      <Text style={styles.difficultyText}>
-                        {suggestion.difficulty}
+        ) : (
+          result && (
+            <View style={styles.results}>
+              <Text style={styles.materialText}>
+                ✨ Detected Material: {result.material}
+              </Text>
+              <Text style={styles.suggestionsTitle}>
+                Recommended Upcycling Projects:
+              </Text>
+              {result.suggestions.map((suggestion) => (
+                <View key={suggestion.id} style={styles.suggestionContainer}>
+                  <Link href={`/idea/${suggestion.id}`} asChild>
+                    <TouchableOpacity style={styles.suggestionCard}>
+                      <Text style={styles.suggestionTitle}>
+                        {suggestion.title}
                       </Text>
-                    </View>
-                  </TouchableOpacity>
-                </Link>
-                {/* <TouchableOpacity 
+                      <View
+                        style={[
+                          styles.difficultyBadge,
+                          suggestion.difficulty === 'Easy'
+                            ? styles.difficultyEasy
+                            : suggestion.difficulty === 'Medium'
+                            ? styles.difficultyMedium
+                            : styles.difficultyHard,
+                        ]}
+                      >
+                        <Text style={styles.difficultyText}>
+                          {suggestion.difficulty}
+                        </Text>
+                      </View>
+                    </TouchableOpacity>
+                  </Link>
+                  {/* <TouchableOpacity 
                   style={styles.shareButton}
                   onPress={() => shareIdea(suggestion)}
                 >
                   <Share2 size={18} color="#2F9E44" />
                   <Text style={styles.shareButtonText}>Share</Text>
                 </TouchableOpacity> */}
-              </View>
-            ))}
-          </View>
+                </View>
+              ))}
+            </View>
+          )
         )}
       </View>
     </ScrollView>
