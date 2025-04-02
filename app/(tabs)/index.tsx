@@ -68,7 +68,9 @@ export default function UploadScreen() {
 
     try {
       if (!user) {
+        alert('Please log in to upload images');
         router.push('/login');
+        return;
         throw new Error('User not authenticated');
       }
 
